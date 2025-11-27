@@ -119,7 +119,7 @@ const Index = () => {
 
           {/* Subtitle */}
           <p className={`text-xl md:text-2xl text-gold-gradient font-light tracking-wide bg-[length:200%_auto] ${!isMobile && !prefersReducedMotion ? 'animate-shimmer' : ''}`}>
-            Together We Light the Square.
+            Together We Light up the Village.
           </p>
         </div>
 
