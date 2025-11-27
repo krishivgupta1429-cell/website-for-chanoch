@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -25,7 +24,7 @@ const RaffleForm = () => {
     phoneNumber: "",
     numberOfAdults: "",
     numberOfChildren: "",
-    reason: "",
+    reasons: [] as string[],
     otherReason: "",
     sponsorships: [] as string[],
     cansQuantity: "",
@@ -48,21 +47,17 @@ const RaffleForm = () => {
   // Get current format based on area code
   const currentFormat = phoneFormats[formData.areaCode] || { placeholder: 'Phone number', digits: 15 };
 
-  // Can options with quantities and amounts
+  // Can options with quantities and amounts ($1 per can)
   const canOptions = [
     { quantity: 0, label: "0 CANS – $0", amount: 0 },
-    { quantity: 1, label: "1 CAN – $4", amount: 4 },
-    { quantity: 2, label: "2 CAN – $8", amount: 8 },
-    { quantity: 4, label: "4 CANS – $16", amount: 16 },
-    { quantity: 6, label: "6 CANS – $24", amount: 24 },
-    { quantity: 8, label: "8 CANS – $32", amount: 32 },
-    { quantity: 10, label: "10 CANS – $40", amount: 40 },
-    { quantity: 15, label: "15 CANS – $60", amount: 60 },
-    { quantity: 20, label: "20 CANS – $80", amount: 80 },
-    { quantity: 30, label: "30 CANS – $120", amount: 120 },
-    { quantity: 40, label: "40 CANS – $160", amount: 160 },
-    { quantity: 50, label: "50 CANS – $200", amount: 200 },
-    { quantity: 100, label: "100 CANS – $400", amount: 400 },
+    { quantity: 1, label: "1 CAN – $1", amount: 1 },
+    { quantity: 10, label: "10 CANS – $10", amount: 10 },
+    { quantity: 20, label: "20 CANS – $20", amount: 20 },
+    { quantity: 30, label: "30 CANS – $30", amount: 30 },
+    { quantity: 40, label: "40 CANS – $40", amount: 40 },
+    { quantity: 50, label: "50 CANS – $50", amount: 50 },
+    { quantity: 60, label: "60 CANS – $60", amount: 60 },
+    { quantity: 70, label: "70 CANS – $70", amount: 70 },
   ];
 
   // Get selected can option details
@@ -272,7 +267,7 @@ const RaffleForm = () => {
     }
 
     // Validate otherReason if "other" is selected
-    if (formData.reason === "other" && !formData.otherReason.trim()) {
+    if (formData.reasons.includes("other") && !formData.otherReason.trim()) {
       toast.error("Please tell us why you enjoy this event", {
         description: "The 'Other' option requires a response.",
       });
@@ -296,7 +291,7 @@ const RaffleForm = () => {
           phoneNumber: formData.phoneNumber,
           numberOfAdults: formData.numberOfAdults,
           numberOfChildren: formData.numberOfChildren,
-          enjoyReason: formData.reason,
+          enjoyReason: formData.reasons.join(", "),
           otherEnjoyReason: formData.otherReason,
           sponsorships: formData.sponsorships,
           cansQuantity: formData.cansQuantity,
@@ -346,7 +341,7 @@ const RaffleForm = () => {
           phoneNumber: formData.phoneNumber,
           numberOfAdults: formData.numberOfAdults,
           numberOfChildren: formData.numberOfChildren,
-          enjoyReason: formData.reason,
+          enjoyReason: formData.reasons.join(", "),
           otherEnjoyReason: formData.otherReason,
           sponsorships: formData.sponsorships,
           cansQuantity: formData.cansQuantity,
@@ -367,7 +362,7 @@ const RaffleForm = () => {
             phoneNumber: "",
             numberOfAdults: "",
             numberOfChildren: "",
-            reason: "",
+            reasons: [],
             otherReason: "",
             sponsorships: [],
             cansQuantity: "",
@@ -560,47 +555,86 @@ const RaffleForm = () => {
           <Label className="text-foreground font-medium text-base">
             I enjoy events like this because: <span className="text-gold">*</span>
           </Label>
-          <RadioGroup
-            value={formData.reason}
-            onValueChange={(value) => {
-              setFormData({ ...formData, reason: value, otherReason: value !== "other" ? "" : formData.otherReason });
-            }}
-            className="space-y-2"
-          >
+          <div className="space-y-2">
             <Label htmlFor="cultures" className="flex items-center gap-3 min-h-[44px] group px-2 py-2 rounded-lg hover:bg-gold/5 transition-colors duration-200 cursor-pointer">
-              <RadioGroupItem value="cultures" id="cultures" className="border-gold/60 text-gold data-[state=checked]:border-gold focus-visible:ring-gold/40" />
+              <Checkbox 
+                id="cultures" 
+                checked={formData.reasons.includes("cultures")}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setFormData({ ...formData, reasons: [...formData.reasons, "cultures"] });
+                  } else {
+                    setFormData({ ...formData, reasons: formData.reasons.filter(r => r !== "cultures") });
+                  }
+                }}
+                className="border-gold/60 text-gold data-[state=checked]:bg-gold data-[state=checked]:border-gold focus-visible:ring-gold/40" 
+              />
               <span className="text-base font-normal text-foreground/90 group-hover:text-gold transition-colors duration-200 leading-relaxed">
                 I enjoy learning about other cultures
               </span>
-              </Label>
+            </Label>
             <Label htmlFor="jewish" className="flex items-center gap-3 min-h-[44px] group px-2 py-2 rounded-lg hover:bg-gold/5 transition-colors duration-200 cursor-pointer">
-              <RadioGroupItem value="jewish" id="jewish" className="border-gold/60 text-gold data-[state=checked]:border-gold focus-visible:ring-gold/40" />
+              <Checkbox 
+                id="jewish" 
+                checked={formData.reasons.includes("jewish")}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setFormData({ ...formData, reasons: [...formData.reasons, "jewish"] });
+                  } else {
+                    setFormData({ ...formData, reasons: formData.reasons.filter(r => r !== "jewish") });
+                  }
+                }}
+                className="border-gold/60 text-gold data-[state=checked]:bg-gold data-[state=checked]:border-gold focus-visible:ring-gold/40" 
+              />
               <span className="text-base font-normal text-foreground/90 group-hover:text-gold transition-colors duration-200 leading-relaxed">
                 I'm Jewish
               </span>
-              </Label>
+            </Label>
             <Label htmlFor="support" className="flex items-center gap-3 min-h-[44px] group px-2 py-2 rounded-lg hover:bg-gold/5 transition-colors duration-200 cursor-pointer">
-              <RadioGroupItem value="support" id="support" className="border-gold/60 text-gold data-[state=checked]:border-gold focus-visible:ring-gold/40" />
+              <Checkbox 
+                id="support" 
+                checked={formData.reasons.includes("support")}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setFormData({ ...formData, reasons: [...formData.reasons, "support"] });
+                  } else {
+                    setFormData({ ...formData, reasons: formData.reasons.filter(r => r !== "support") });
+                  }
+                }}
+                className="border-gold/60 text-gold data-[state=checked]:bg-gold data-[state=checked]:border-gold focus-visible:ring-gold/40" 
+              />
               <span className="text-base font-normal text-foreground/90 group-hover:text-gold transition-colors duration-200 leading-relaxed">
                 I like to show my support for the Jewish Community
               </span>
-              </Label>
-            <Label htmlFor="other" className="flex items-center gap-3 min-h-[44px] group px-2 py-2 rounded-lg hover:bg-gold/5 transition-colors duration-200 cursor-pointer">
-              <RadioGroupItem value="other" id="other" className="border-gold/60 text-gold data-[state=checked]:border-gold focus-visible:ring-gold/40" aria-controls="other-reason-textarea" />
+            </Label>
+            <Label htmlFor="other-reason" className="flex items-center gap-3 min-h-[44px] group px-2 py-2 rounded-lg hover:bg-gold/5 transition-colors duration-200 cursor-pointer">
+              <Checkbox 
+                id="other-reason" 
+                checked={formData.reasons.includes("other")}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setFormData({ ...formData, reasons: [...formData.reasons, "other"] });
+                  } else {
+                    setFormData({ ...formData, reasons: formData.reasons.filter(r => r !== "other"), otherReason: "" });
+                  }
+                }}
+                className="border-gold/60 text-gold data-[state=checked]:bg-gold data-[state=checked]:border-gold focus-visible:ring-gold/40" 
+                aria-controls="other-reason-textarea"
+              />
               <span className="text-base font-normal text-foreground/90 group-hover:text-gold transition-colors duration-200 leading-relaxed">
                 Other
               </span>
-              </Label>
-          </RadioGroup>
+            </Label>
+          </div>
           {/* Conditional textarea for "Other" option */}
-          {formData.reason === "other" && (
+          {formData.reasons.includes("other") && (
             <div className="space-y-2 mt-2 pl-8 animate-fade-in">
               <Textarea
                 id="other-reason-textarea"
                 placeholder="Tell us why you enjoy this event…"
                 value={formData.otherReason}
                 onChange={(e) => setFormData({ ...formData, otherReason: e.target.value })}
-                required={formData.reason === "other"}
+                required={formData.reasons.includes("other")}
                 className="bg-input/80 backdrop-blur-sm border-border/60 text-foreground placeholder:text-foreground/50 focus:border-gold focus:ring-2 focus:ring-gold/40 transition-all duration-300 hover:border-gold/60 hover:shadow-[0_0_15px_rgba(255,215,0,0.2)] min-h-[100px] resize-y"
                 aria-label="Tell us why you enjoy this event"
               />
@@ -617,9 +651,85 @@ const RaffleForm = () => {
 
         {/* Support */}
         <div className="space-y-4">
+          {/* Can Quantity Selector */}
+          <div className="space-y-3">
+            <div className="relative">
+              <Label 
+                htmlFor="cansQuantity" 
+                className="text-foreground font-bold text-lg md:text-xl block relative pb-2"
+              >
+                <span className="relative z-10 drop-shadow-[0_0_8px_rgba(255,215,0,0.3)]">How many cans would you like us to shop for you?</span>
+                {/* Golden underline/highlight effect */}
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold/60 to-transparent opacity-70 animate-pulse" />
+                <span className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent shadow-[0_0_6px_rgba(255,215,0,0.4)]" />
+              </Label>
+            </div>
+            <Select
+              value={formData.cansQuantity}
+              onValueChange={(value) => setFormData({ ...formData, cansQuantity: value })}
+            >
+              <SelectTrigger
+                id="cansQuantity"
+                aria-label="Select quantity of cans"
+                className="bg-input/80 backdrop-blur-sm border-border/60 text-foreground placeholder:text-foreground/50 focus:border-gold focus:ring-2 focus:ring-gold/40 transition-all duration-300 hover:border-gold/60 hover:shadow-[0_0_15px_rgba(255,215,0,0.2)]"
+              >
+                <SelectValue placeholder="Select quantity" />
+              </SelectTrigger>
+              <SelectContent className="bg-card/95 backdrop-blur-md border-border/60 text-foreground shadow-lg mobile-select-content">
+                {canOptions.map((option) => (
+                  <SelectItem
+                    key={option.quantity}
+                    value={option.label}
+                    className="text-foreground focus:bg-gold/10 focus:text-gold hover:bg-gold/5 cursor-pointer transition-colors"
+                  >
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            {/* Helper line */}
+            <p className="text-xs text-foreground/60 mt-2">
+              We'll purchase and deliver the cans on your behalf for the menorah construction.
+            </p>
+            
+            {/* Hidden inputs for form submission */}
+            <input
+              type="hidden"
+              name="cans_quantity"
+              value={cansQuantity}
+            />
+            <input
+              type="hidden"
+              name="cans_amount_usd"
+              value={cansAmountUsd.toFixed(2)}
+            />
+          </div>
+
+          {/* Email Updates Opt-in */}
+          <div className="space-y-2">
+            <div className="flex items-start space-x-3 group p-2 rounded-lg hover:bg-gold/5 transition-colors duration-200">
+              <Checkbox
+                id="emailUpdatesOptIn"
+                name="email_updates_opt_in"
+                checked={formData.emailUpdatesOptIn}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, emailUpdatesOptIn: checked as boolean })
+                }
+                className="mt-1 border-gold/60 data-[state=checked]:bg-gold data-[state=checked]:border-gold ring-offset-background focus-visible:ring-2 focus-visible:ring-gold/40 transition-all duration-200 email-updates-checkbox"
+              />
+              <Label
+                htmlFor="emailUpdatesOptIn"
+                className="font-normal cursor-pointer text-foreground/90 group-hover:text-gold transition-colors duration-200 text-sm leading-relaxed"
+              >
+                Yes, I would like to receive email updates about future Chabad Traverse City events and programs
+              </Label>
+            </div>
+          </div>
+
           {/* Intro line */}
-          <p className="text-foreground font-medium text-base text-left">
-            This free community event is made possible by generous donors like you. Please consider supporting and being part of this beautiful celebration — your contribution will also make you a part of the Lamplighter Wall.
+          <p className="text-foreground font-medium text-base text-left mt-6">
+            This free community event is created in partnership with the Westville Village Renaissance Alliance (WVRA), and is fueled by generous donors like you. Please consider supporting and being part of this beautiful celebration — your contribution will also make you a part of the Lamplighter Wall.
           </p>
           
           {/* Sponsorship Section */}
@@ -736,68 +846,6 @@ const RaffleForm = () => {
           </div>
         </div>
 
-        {/* Glowing Divider Separator */}
-        <div className="flex items-center justify-center py-6 md:py-8 my-4 md:my-6">
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
-          <div className="mx-4 text-2xl animate-candle-flicker">✨</div>
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
-        </div>
-
-        {/* Can Quantity Selector */}
-        <div className="space-y-3">
-          <div className="relative">
-            <Label 
-              htmlFor="cansQuantity" 
-              className="text-foreground font-bold text-lg md:text-xl block relative pb-2"
-            >
-              <span className="relative z-10 drop-shadow-[0_0_8px_rgba(255,215,0,0.3)]">How many cans would you like us to shop for you?</span>
-              {/* Golden underline/highlight effect */}
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold/60 to-transparent opacity-70 animate-pulse" />
-              <span className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent shadow-[0_0_6px_rgba(255,215,0,0.4)]" />
-            </Label>
-          </div>
-          <Select
-            value={formData.cansQuantity}
-            onValueChange={(value) => setFormData({ ...formData, cansQuantity: value })}
-          >
-            <SelectTrigger
-              id="cansQuantity"
-              aria-label="Select quantity of cans"
-              className="bg-input/80 backdrop-blur-sm border-border/60 text-foreground placeholder:text-foreground/50 focus:border-gold focus:ring-2 focus:ring-gold/40 transition-all duration-300 hover:border-gold/60 hover:shadow-[0_0_15px_rgba(255,215,0,0.2)]"
-            >
-              <SelectValue placeholder="Select quantity" />
-            </SelectTrigger>
-            <SelectContent className="bg-card/95 backdrop-blur-md border-border/60 text-foreground shadow-lg mobile-select-content">
-              {canOptions.map((option) => (
-                <SelectItem
-                  key={option.quantity}
-                  value={option.label}
-                  className="text-foreground focus:bg-gold/10 focus:text-gold hover:bg-gold/5 cursor-pointer transition-colors"
-                >
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          {/* Helper line */}
-          <p className="text-xs text-foreground/60 mt-2">
-            We'll purchase and deliver the cans on your behalf for the menorah construction.
-          </p>
-          
-          {/* Hidden inputs for form submission */}
-          <input
-            type="hidden"
-            name="cans_quantity"
-            value={cansQuantity}
-          />
-          <input
-            type="hidden"
-            name="cans_amount_usd"
-            value={cansAmountUsd.toFixed(2)}
-          />
-        </div>
-
         {/* Comments / Special Requests */}
         <div className="space-y-2">
           <Label htmlFor="comments" className="text-foreground font-medium text-base">
@@ -827,26 +875,6 @@ const RaffleForm = () => {
           </button>
         </div>
 
-        {/* Email Updates Opt-in */}
-        <div className="space-y-2">
-          <div className="flex items-start space-x-3 group p-2 rounded-lg hover:bg-gold/5 transition-colors duration-200">
-            <Checkbox
-              id="emailUpdatesOptIn"
-              name="email_updates_opt_in"
-              checked={formData.emailUpdatesOptIn}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, emailUpdatesOptIn: checked as boolean })
-              }
-              className="mt-1 border-gold/60 data-[state=checked]:bg-gold data-[state=checked]:border-gold ring-offset-background focus-visible:ring-2 focus-visible:ring-gold/40 transition-all duration-200 email-updates-checkbox"
-            />
-              <Label
-              htmlFor="emailUpdatesOptIn"
-              className="font-normal cursor-pointer text-foreground/90 group-hover:text-gold transition-colors duration-200 text-sm leading-relaxed"
-              >
-              Yes, I would like to receive email updates about future Chabad Traverse City events and programs
-              </Label>
-          </div>
-        </div>
       </div>
 
       {/* Submit */}
