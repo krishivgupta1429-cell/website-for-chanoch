@@ -116,7 +116,7 @@ const Index = () => {
 
           {/* Date and Time */}
           <p className={`text-2xl md:text-3xl text-gold-gradient font-medium tracking-wide bg-[length:200%_auto] my-4 md:my-6 ${!isMobile && !prefersReducedMotion ? 'animate-shimmer' : ''}`}>
-            Dec 21 • 5:00 pm
+            Dec 14 • 4:00 pm
           </p>
 
           {/* Subtitle */}
@@ -177,6 +177,14 @@ const Index = () => {
           <p className="text-lg text-gold font-light tracking-wide drop-shadow-[0_0_10px_rgba(255,215,0,0.3)] text-center md:text-lg">
             May the lights of Chanukah bring warmth and joy to your home
           </p>
+          
+          {/* Chabad contact info */}
+          <div className="text-lg text-gold font-light tracking-wide drop-shadow-[0_0_10px_rgba(255,215,0,0.3)] text-center space-y-1">
+            <p>Chabad of Westville</p>
+            <p>Ph: 203-479-0313</p>
+            <p>ChabadWestville.org</p>
+            <p>69 W Rock Ave, New Haven, CT 06515</p>
+          </div>
           
           {/* Sponsor credit */}
           <p className="text-sm md:text-base font-semibold text-ivory/90 drop-shadow-[0_0_8px_rgba(255,255,255,0.2)] tracking-wide">

@@ -556,23 +556,6 @@ const RaffleForm = () => {
             I enjoy events like this because: <span className="text-gold">*</span>
           </Label>
           <div className="space-y-2">
-            <Label htmlFor="cultures" className="flex items-center gap-3 min-h-[44px] group px-2 py-2 rounded-lg hover:bg-gold/5 transition-colors duration-200 cursor-pointer">
-              <Checkbox 
-                id="cultures" 
-                checked={formData.reasons.includes("cultures")}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setFormData({ ...formData, reasons: [...formData.reasons, "cultures"] });
-                  } else {
-                    setFormData({ ...formData, reasons: formData.reasons.filter(r => r !== "cultures") });
-                  }
-                }}
-                className="border-gold/60 text-gold data-[state=checked]:bg-gold data-[state=checked]:border-gold focus-visible:ring-gold/40" 
-              />
-              <span className="text-base font-normal text-foreground/90 group-hover:text-gold transition-colors duration-200 leading-relaxed">
-                I enjoy learning about other cultures
-              </span>
-            </Label>
             <Label htmlFor="jewish" className="flex items-center gap-3 min-h-[44px] group px-2 py-2 rounded-lg hover:bg-gold/5 transition-colors duration-200 cursor-pointer">
               <Checkbox 
                 id="jewish" 
@@ -605,6 +588,23 @@ const RaffleForm = () => {
               />
               <span className="text-base font-normal text-foreground/90 group-hover:text-gold transition-colors duration-200 leading-relaxed">
                 I like to show my support for the Jewish Community
+              </span>
+            </Label>
+            <Label htmlFor="cultures" className="flex items-center gap-3 min-h-[44px] group px-2 py-2 rounded-lg hover:bg-gold/5 transition-colors duration-200 cursor-pointer">
+              <Checkbox 
+                id="cultures" 
+                checked={formData.reasons.includes("cultures")}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setFormData({ ...formData, reasons: [...formData.reasons, "cultures"] });
+                  } else {
+                    setFormData({ ...formData, reasons: formData.reasons.filter(r => r !== "cultures") });
+                  }
+                }}
+                className="border-gold/60 text-gold data-[state=checked]:bg-gold data-[state=checked]:border-gold focus-visible:ring-gold/40" 
+              />
+              <span className="text-base font-normal text-foreground/90 group-hover:text-gold transition-colors duration-200 leading-relaxed">
+                I enjoy learning about other cultures
               </span>
             </Label>
             <Label htmlFor="other-reason" className="flex items-center gap-3 min-h-[44px] group px-2 py-2 rounded-lg hover:bg-gold/5 transition-colors duration-200 cursor-pointer">
@@ -651,6 +651,37 @@ const RaffleForm = () => {
 
         {/* Support */}
         <div className="space-y-4">
+          {/* Informational card - static, non-interactive */}
+          <div className="space-y-4 bg-gradient-to-br from-purple-900/20 via-purple-800/15 to-gold/10 p-6 rounded-xl border border-purple-500/30 backdrop-blur-sm relative overflow-hidden">
+            {/* Subtle glow effect with purple accent */}
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 via-transparent to-gold/5 pointer-events-none" />
+            {/* Header bar effect */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500/50 via-purple-400/40 to-gold/30" />
+            <div className="relative z-10 space-y-3">
+              {/* Heading */}
+              <h3 className="text-base font-semibold text-gold leading-tight flex items-center gap-2">
+                <span className="text-lg">🥫</span>
+                <span>Help Build a Menorah Out of Cans and Support Those in Need!</span>
+              </h3>
+              
+              {/* Body content */}
+              <div className="space-y-2 text-sm text-foreground/80 leading-relaxed">
+                <p>
+                  This year, we're building a menorah entirely out of canned food, which will later be donated to local homeless shelters. You can participate in this meaningful project in two ways:
+                </p>
+                <ol className="list-decimal list-inside space-y-1.5 ml-2">
+                  <li>Drop off cans at the Chabad JCC.</li>
+                  <li>Have us do the shopping for you! And simply select how many cans you'd like to contribute. Each can costs an average of $4.</li>
+                </ol>
+              </div>
+              
+              {/* Closing line - smaller, italic */}
+              <p className="text-xs text-foreground/70 italic leading-relaxed">
+                Each can become a building block of hope, turning our celebration into a beacon of giving.
+              </p>
+            </div>
+          </div>
+
           {/* Can Quantity Selector */}
           <div className="space-y-3">
             <div className="relative">
@@ -722,7 +753,7 @@ const RaffleForm = () => {
                 htmlFor="emailUpdatesOptIn"
                 className="font-normal cursor-pointer text-foreground/90 group-hover:text-gold transition-colors duration-200 text-sm leading-relaxed"
               >
-                Yes, I would like to receive email updates about future Chabad Traverse City events and programs
+                Yes, I would like to receive email updates about future Chabad Westville events and programs
               </Label>
             </div>
           </div>
@@ -806,44 +837,6 @@ const RaffleForm = () => {
                 value={sponsorshipTotal.toFixed(2)}
               />
             </div>
-        </div>
-
-        {/* Separator */}
-        <div className="flex items-center justify-center py-4">
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
-          <div className="mx-4 text-2xl animate-candle-flicker">✨</div>
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
-        </div>
-
-        {/* Informational card - static, non-interactive */}
-        <div className="space-y-4 bg-gradient-to-br from-purple-900/20 via-purple-800/15 to-gold/10 p-6 rounded-xl border border-purple-500/30 backdrop-blur-sm relative overflow-hidden">
-          {/* Subtle glow effect with purple accent */}
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 via-transparent to-gold/5 pointer-events-none" />
-          {/* Header bar effect */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500/50 via-purple-400/40 to-gold/30" />
-          <div className="relative z-10 space-y-3">
-            {/* Heading */}
-            <h3 className="text-base font-semibold text-gold leading-tight flex items-center gap-2">
-              <span className="text-lg">🥫</span>
-              <span>Help Build a Menorah Out of Cans and Support Those in Need!</span>
-            </h3>
-            
-            {/* Body content */}
-            <div className="space-y-2 text-sm text-foreground/80 leading-relaxed">
-              <p>
-                This year, we're building a menorah entirely out of canned food, which will later be donated to local homeless shelters. You can participate in this meaningful project in two ways:
-              </p>
-              <ol className="list-decimal list-inside space-y-1.5 ml-2">
-                <li>Drop off cans at the Chabad JCC.</li>
-                <li>Have us do the shopping for you! And simply select how many cans you'd like to contribute. Each can costs an average of $4.</li>
-              </ol>
-            </div>
-            
-            {/* Closing line - smaller, italic */}
-            <p className="text-xs text-foreground/70 italic leading-relaxed">
-              Each can become a building block of hope, turning our celebration into a beacon of giving.
-            </p>
-          </div>
         </div>
 
         {/* Comments / Special Requests */}
