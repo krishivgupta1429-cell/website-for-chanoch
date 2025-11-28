@@ -667,7 +667,7 @@ const RaffleForm = () => {
                   This year, we're building a menorah entirely out of canned food, which will later be donated to local homeless shelters. You can participate in this meaningful project in two ways:
                 </p>
                 <ol className="list-decimal list-inside space-y-1.5 ml-2">
-                  <li>Drop off cans at the Chabad JCC.</li>
+                  <li>Drop off cans at the Chabad of Westville.</li>
                   <li>Have us do the shopping for you! And simply select how many cans you'd like to contribute. </li>
                 </ol>
               </div>
