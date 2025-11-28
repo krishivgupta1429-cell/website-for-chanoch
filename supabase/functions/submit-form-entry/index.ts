@@ -25,44 +25,32 @@ interface SubmitEntryBody {
   verification_sent_at: string;
 }
 
-async function sendRegistrationEmail(fullName: string, email: string): Promise<void> {
+// Reusable Brevo email sending function
+async function sendBrevoEmail({
+  toEmail,
+  toName,
+  subject,
+  html,
+}: {
+  toEmail: string;
+  toName: string;
+  subject: string;
+  html: string;
+}): Promise<{ success: boolean; error?: string }> {
   try {
     const apiKey = Deno.env.get("BREVO_API_KEY");
     if (!apiKey) {
       throw new Error("Missing BREVO_API_KEY");
     }
 
-    const htmlContent = `Hi ${fullName},<br/><br/>
-      Thank you so much for signing up for Menorah in the Square—we can't wait to celebrate with you!<br/><br/>
-      📍 <strong>Location:</strong> Rotary Square<br/>
-      203 S Union St, Traverse City, MI 49684<br/>
-      🕔 <strong>Event Start Time:</strong> 5:00 PM<br/>
-      📅 <strong>Date:</strong> December 21st<br/><br/>
-      Your participation helps bring warmth and light to our whole community.<br/><br/>
-      To help spread the light even further, would you consider forwarding the event sign-up to five friends?<br/><br/>
-      Here's the link: <a href="https://menorah.jewishtc.org/">https://menorah.jewishtc.org/</a><br/><br/>
-      If you have any questions at all, feel free to reach out anytime.<br/>
-      Looking forward to celebrating together!<br/><br/>
-      Warmly,<br/>
-      Rabbi Laibel & Chaya Shemtov<br/>
-      Chabad Jewish Center of Traverse City<br/>
-      <a href="https://JewishTC.org">JewishTC.org</a><br/><br/>
-      <strong>P.S.</strong> Congratulations on being among the first 100 sign-ups!<br/>
-      Please show this email when you arrive to receive your free beanie.<br/>
-      Be sure to show it before 5:05 PM—after that time, we'll begin giving them out to everyone.<br/><br/>
-      <strong>P.S.s</strong><br/>
-      View the lamplighter wall:<br/>
-      <a href="https://www.jewishtc.org/templates/articlecco_cdo/aid/7109138/jewish/Untitled.htm">https://www.jewishtc.org/templates/articlecco_cdo/aid/7109138/jewish/Untitled.htm</a>`;
-
     const payload = {
-      sender: { name: "Rabbi Laibel Shemtov", email: "rabbi@jewishtc.org" },
-      to: [{ email, name: fullName }],
-      bcc: [{ email: "laibelswb@gmail.com", name: "Rabbi Laibel" }],
-      subject: "You're Registered for Menorah in the Square!",
-      htmlContent,
+      sender: { name: "Chabad of Westville", email: "rabbi@chabadwestville.org" },
+      to: [{ email: toEmail, name: toName }],
+      subject,
+      htmlContent: html,
     };
 
-    console.log(`[email] Attempting to send registration email to ${email}...`);
+    console.log(`[brevo] Attempting to send email to ${toEmail}...`);
 
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
@@ -75,14 +63,36 @@ async function sendRegistrationEmail(fullName: string, email: string): Promise<v
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Brevo API error: ${response.status} - ${errorText}`);
+      console.error(`[brevo] API error: ${response.status} - ${errorText}`);
+      return { success: false, error: `Brevo API error: ${response.status}` };
     }
     
-    console.log(`[email] Sent successfully to ${email}`);
+    console.log(`[brevo] Email sent successfully to ${toEmail}`);
+    return { success: true };
   } catch (error) {
-    console.error(`[email] Error: ${error}`);
-    // Don't throw - we don't want email failures to block form submission
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error(`[brevo] Error: ${errorMsg}`);
+    return { success: false, error: errorMsg };
   }
+}
+
+// Registration-only email template (no payment)
+function renderRegistrationOnlyTemplate(fullName: string): string {
+  return `Hi ${fullName},<br/><br/>
+Thank you so much for signing up for Menorah in the Village, we can't wait to celebrate with you!<br/><br/>
+📍 <strong>Location:</strong> The Central Ave Patio<br/>
+882 Whalley Avenue, New Haven, CT 06515<br/>
+🕔 <strong>Event Start Time:</strong> 4:00 PM<br/>
+📅 <strong>Date:</strong> December 14<br/><br/>
+Your participation helps bring warmth and light to our whole community.<br/><br/>
+To help spread the light even further, would you consider forwarding the event sign-up to friends and family?<br/><br/>
+Here's the link: <a href="https://menorah.chabadwestville.org">https://menorah.chabadwestville.org</a><br/><br/>
+If you have any questions at all, feel free to reach out anytime.<br/>
+Looking forward to celebrating together!<br/><br/>
+Warmly,<br/>
+Rabbi Chanoch & Mushka Wineberg<br/>
+Chabad of Westville<br/>
+<a href="https://chabadwestville.org">chabadwestville.org</a>`;
 }
 
 serve(async (req) => {
@@ -152,9 +162,16 @@ serve(async (req) => {
     // Send registration confirmation email only for NON-donors
     // Donors will receive their combined email after payment success
     if (!body.wants_to_donate) {
-      sendRegistrationEmail(body.full_name, body.email).catch(err => {
-        console.error("[submit-form-entry] Email sending failed but continuing:", err);
+      const emailResult = await sendBrevoEmail({
+        toEmail: body.email.trim().toLowerCase(),
+        toName: body.full_name.trim(),
+        subject: "You're Registered for Menorah in the Westville Village!",
+        html: renderRegistrationOnlyTemplate(body.full_name.trim()),
       });
+      
+      if (!emailResult.success) {
+        console.error("[submit-form-entry] Registration email failed:", emailResult.error);
+      }
     }
 
     return new Response(JSON.stringify({ id: data.id }), {

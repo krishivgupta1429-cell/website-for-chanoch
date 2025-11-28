@@ -13,91 +13,32 @@ const logStep = (step: string, details?: any) => {
   console.log(`[VERIFY-PAYMENT-LIVE] ${step}${detailsStr}`);
 };
 
-// Send combined confirmation + donation receipt email via Brevo API
-async function sendDonorConfirmationEmail(
-  fullName: string,
-  email: string,
-  donationData: {
-    amountCents: number;
-    cansQuantity: number;
-    sponsorships: string[];
-    donationDate: string;
-    transactionId: string;
-  }
-): Promise<void> {
+// Reusable Brevo email sending function
+async function sendBrevoEmail({
+  toEmail,
+  toName,
+  subject,
+  html,
+}: {
+  toEmail: string;
+  toName: string;
+  subject: string;
+  html: string;
+}): Promise<{ success: boolean; error?: string }> {
   try {
     const apiKey = Deno.env.get("BREVO_API_KEY");
     if (!apiKey) {
       throw new Error("Missing BREVO_API_KEY");
     }
 
-    // Format amount from cents to dollars
-    const amountDollars = donationData.amountCents / 100;
-    const formattedAmount = Number.isInteger(amountDollars)
-      ? `$${amountDollars}`
-      : `$${amountDollars.toFixed(2)}`;
-
-    // Format donation date
-    const date = new Date(donationData.donationDate);
-    const formattedDate = date.toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
-
-    // Build conditional donation details bullets
-    const bullets: string[] = [];
-    
-    // Total donation amount with optional sponsorships
-    if (donationData.sponsorships && donationData.sponsorships.length > 0) {
-      const sponsorshipText = donationData.sponsorships.join(", ");
-      bullets.push(`• Total Donation amount: ${formattedAmount} — ${sponsorshipText}`);
-    } else {
-      bullets.push(`• Total Donation amount: ${formattedAmount}`);
-    }
-    
-    // Cans line (only if cans > 0)
-    if (donationData.cansQuantity > 0) {
-      bullets.push(`• ${donationData.cansQuantity} cans sponsored`);
-    }
-    
-    // Date and transaction reference
-    bullets.push(`• ${formattedDate}`);
-    bullets.push(`• Ref: ${donationData.transactionId}`);
-
-    const htmlContent = `Dear ${fullName},<br/><br/>
-      Thank you for signing up for Menorah in the Square. We're delighted that you'll be joining us as our community gathers to celebrate the light and joy of Chanukah together.<br/><br/>
-      <strong>Event Information</strong><br/><br/>
-      📍 Rotary Square<br/>
-      203 S Union St, Traverse City, MI 49684<br/><br/>
-      🕔 Event Start: 5:00 PM<br/>
-      📅 Date: December 21st<br/><br/>
-      This annual celebration has become a cherished moment of unity in our city—filled with warmth, music, doughnuts, and the glow of the menorah. We look forward to sharing this uplifting evening with you.<br/><br/>
-      To help spread the light even further, we warmly invite you to share the sign-up link with five friends:<br/>
-      👉 <a href="https://menorah.jewishtc.org/">https://menorah.jewishtc.org/</a><br/><br/>
-      <strong>Congratulations!!</strong><br/>
-      You are among the first 100 sign-ups.<br/>
-      Please present this email upon arrival to receive your complimentary beanie before 5:05 PM.<br/><br/>
-      To see the Lamplighter Wall, visit:<br/>
-      <a href="https://www.jewishtc.org/templates/articlecco_cdo/aid/7109138/jewish/Untitled.htm">https://www.jewishtc.org/templates/articlecco_cdo/aid/7109138/jewish/Untitled.htm</a><br/>
-      If you prefer to remain anonymous on the Lamplighter Donor Wall, simply reply to this email and let us know—we're happy to list your gift anonymously.<br/><br/>
-      ⸻<br/><br/>
-      <strong>Donation Acknowledgment</strong><br/><br/>
-      We are also truly grateful for your generous support of Menorah in the Square. Your contribution helps build our Menorah of Cans and brings light and compassion to those in need throughout Traverse City.<br/><br/>
-      <strong>Donation Details</strong><br/>
-      ${bullets.join("<br/>")}<br/><br/>
-      Your partnership makes a heartfelt difference. Thank you for helping illuminate our community with kindness.<br/><br/>
-      ⸻`;
-
     const payload = {
-      sender: { name: "Rabbi Laibel Shemtov", email: "rabbi@jewishtc.org" },
-      to: [{ email, name: fullName }],
-      bcc: [{ email: "laibelswb@gmail.com", name: "Rabbi Laibel" }],
-      subject: "Welcome to Menorah in the Square ✨",
-      htmlContent,
+      sender: { name: "Chabad of Westville", email: "rabbi@chabadwestville.org" },
+      to: [{ email: toEmail, name: toName }],
+      subject,
+      htmlContent: html,
     };
 
-    console.log(`[donor-confirmation-email] Attempting to send to ${email}...`);
+    console.log(`[brevo] Attempting to send email to ${toEmail}...`);
 
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
@@ -110,14 +51,85 @@ async function sendDonorConfirmationEmail(
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Brevo API error: ${response.status} - ${errorText}`);
+      console.error(`[brevo] API error: ${response.status} - ${errorText}`);
+      return { success: false, error: `Brevo API error: ${response.status}` };
     }
     
-    console.log(`[donor-confirmation-email] Sent successfully to ${email}`);
+    console.log(`[brevo] Email sent successfully to ${toEmail}`);
+    return { success: true };
   } catch (error) {
-    console.error(`[donor-confirmation-email] Error: ${error}`);
-    // Don't throw - we don't want email failures to block payment verification
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error(`[brevo] Error: ${errorMsg}`);
+    return { success: false, error: errorMsg };
   }
+}
+
+// Registration + Donation email template (payment success)
+function renderRegistrationAndDonationTemplate(data: {
+  fullName: string;
+  amountCents: number;
+  sponsorships: string[];
+  cansQuantity: number;
+  donationDate: string;
+  referenceId: string;
+}): string {
+  // Format amount from cents to dollars
+  const amountDollars = data.amountCents / 100;
+  const formattedAmount = Number.isInteger(amountDollars)
+    ? `$${amountDollars}`
+    : `$${amountDollars.toFixed(2)}`;
+
+  // Format donation date in America/New_York timezone
+  const date = new Date(data.donationDate);
+  const formattedDate = date.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "America/New_York",
+  });
+
+  // Format sponsorships
+  const sponsorshipText = data.sponsorships && data.sponsorships.length > 0
+    ? data.sponsorships.join(", ")
+    : "";
+
+  // Build donation details section
+  const donationDetails: string[] = [];
+  
+  if (sponsorshipText) {
+    donationDetails.push(`• ${formattedAmount} — ${sponsorshipText}`);
+  } else {
+    donationDetails.push(`• ${formattedAmount}`);
+  }
+  
+  if (data.cansQuantity > 0) {
+    donationDetails.push(`• ${data.cansQuantity} cans sponsored`);
+  }
+  
+  donationDetails.push(`• Date: ${formattedDate}`);
+  donationDetails.push(`• Reference id: ${data.referenceId}`);
+
+  return `Hi ${data.fullName},<br/><br/>
+Thank you so much for signing up and contributing to the Menorah in the Village, we can't wait to celebrate with you!<br/><br/>
+📍 <strong>Location:</strong> The Central Ave Patio<br/>
+882 Whalley Avenue, New Haven, CT 06515<br/>
+🕔 <strong>Event Start Time:</strong> 4:00 PM<br/>
+📅 <strong>Date:</strong> December 14<br/><br/>
+Your participation helps bring warmth and light to our whole community.<br/><br/>
+(For any can drop offs, we'll reach out to arrange a time and location.)<br/><br/>
+<strong>Donation Acknowledgment:</strong><br/><br/>
+We are also truly grateful for your generous support of Menorah in the Westville Village. Your contribution helps build our Menorah of Cans and brings light and compassion to those in need throughout Westville and New Haven.<br/><br/>
+<strong>Donation Details</strong><br/>
+${donationDetails.join("<br/>")}<br/><br/>
+Your partnership makes a heartfelt difference. Thank you for helping illuminate our community with kindness.<br/><br/>
+To help spread the light even further, would you consider forwarding the event sign-up to friends and family?<br/><br/>
+Here's the link: <a href="https://menorah.chabadwestville.org">https://menorah.chabadwestville.org</a><br/><br/>
+If you have any questions at all, feel free to reach out anytime.<br/>
+Looking forward to celebrating together!<br/><br/>
+Warmly,<br/>
+Rabbi Chanoch & Mushka Wineberg<br/>
+Chabad of Westville<br/>
+<a href="https://chabadwestville.org">chabadwestville.org</a>`;
 }
 
 serve(async (req) => {
@@ -270,19 +282,23 @@ serve(async (req) => {
         amount: amountInCents
       });
       
-      sendDonorConfirmationEmail(
-        submission.full_name,
-        submission.email,
-        {
+      const emailResult = await sendBrevoEmail({
+        toEmail: submission.email,
+        toName: submission.full_name,
+        subject: "You're Registered for Menorah in the Westville Village. Thank you for your donation!",
+        html: renderRegistrationAndDonationTemplate({
+          fullName: submission.full_name,
           amountCents: amountInCents,
-          cansQuantity: submission.cans_quantity || 0,
           sponsorships: submission.sponsorships || [],
+          cansQuantity: submission.cans_quantity || 0,
           donationDate: submission.created_at,
-          transactionId: paymentIntentId || session_id,
-        }
-      ).catch(err => {
-        logStep("ERROR: Donor confirmation email failed but continuing", { error: err });
+          referenceId: paymentIntentId || session_id,
+        }),
       });
+
+      if (!emailResult.success) {
+        logStep("ERROR: Donor confirmation email failed", { error: emailResult.error });
+      }
     }
 
     return new Response(
