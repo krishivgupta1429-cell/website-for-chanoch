@@ -784,14 +784,6 @@ const RaffleForm = () => {
         })} className="bg-input/80 backdrop-blur-sm border-border/60 text-foreground placeholder:text-foreground/50 focus:border-gold focus:ring-2 focus:ring-gold/40 transition-all duration-300 hover:border-gold/60 hover:shadow-[0_0_15px_rgba(255,215,0,0.2)] min-h-[100px] resize-y" aria-label="Comments or special requests" />
         </div>
 
-        {/* Lamplighter Wall Button */}
-        <div className="flex justify-center pt-4 mt-4 border-t border-gold/20">
-          <button type="button" className="px-6 py-2.5 rounded-full bg-gradient-to-r from-gold/20 via-amber/15 to-gold/20 border border-gold/40 text-gold font-medium hover:opacity-90 hover:shadow-[0_0_15px_rgba(255,215,0,0.2)] transition-all duration-200 active:scale-95 relative overflow-hidden" onClick={() => {
-          window.open('https://www.jewishtc.org/templates/articlecco_cdo/aid/7109138/jewish/Untitled.htm', '_blank');
-        }}>
-            <span className="relative z-10">View the Lamplighter Wall</span>
-          </button>
-        </div>
 
       </div>
 
