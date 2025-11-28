@@ -47,7 +47,8 @@ const RaffleForm = () => {
   // Get current format based on area code
   const currentFormat = phoneFormats[formData.areaCode] || { placeholder: 'Phone number', digits: 15 };
 
-  // Can options with quantities and amounts ($1 per can)
+  // Can options: quantity = number of cans saved to DB, amount = price in USD ($1 per can)
+  // The dropdown value is the label string, but cans_quantity in DB stores the quantity number
   const canOptions = [
     { quantity: 0, label: "0 CANS – $0", amount: 0 },
     { quantity: 1, label: "1 CAN – $1", amount: 1 },
