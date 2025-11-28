@@ -110,9 +110,7 @@ const Index = () => {
           </div>
 
           {/* Title with Golden Gradient */}
-          <h1 className={`text-4xl md:text-6xl font-bold mb-4 text-gold-gradient bg-[length:200%_auto] drop-shadow-[0_0_20px_rgba(255,215,0,0.5)] ${!isMobile && !prefersReducedMotion ? 'animate-shimmer' : ''}`}>
-            Menorah in The Square
-          </h1>
+          <h1 className={`text-4xl md:text-6xl font-bold mb-4 text-gold-gradient bg-[length:200%_auto] drop-shadow-[0_0_20px_rgba(255,215,0,0.5)] ${!isMobile && !prefersReducedMotion ? 'animate-shimmer' : ''}`}>Menorah in The Westville Village</h1>
 
           {/* Date and Time */}
           <p className={`text-2xl md:text-3xl text-gold-gradient font-medium tracking-wide bg-[length:200%_auto] my-4 md:my-6 ${!isMobile && !prefersReducedMotion ? 'animate-shimmer' : ''}`}>
@@ -121,7 +119,7 @@ const Index = () => {
 
           {/* Subtitle */}
           <p className={`text-xl md:text-2xl text-gold-gradient font-light tracking-wide bg-[length:200%_auto] ${!isMobile && !prefersReducedMotion ? 'animate-shimmer' : ''}`}>
-            Together We Light the Square.
+            Together We Light up the Village.
           </p>
         </div>
 
