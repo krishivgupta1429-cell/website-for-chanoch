@@ -95,25 +95,23 @@ export async function submitEntry(
 
     const wantsToDonate = formData.sponsorships.length > 0 || formData.cansQuantity !== "";
 
-    // Calculate cans amount
+    // Can options: value = number of cans, price = value × $1 per can
     const canOptions = [
-      { quantity: 1, label: "1 CAN – $4", amount: 4 },
-      { quantity: 2, label: "2 CAN – $8", amount: 8 },
-      { quantity: 4, label: "4 CANS – $16", amount: 16 },
-      { quantity: 6, label: "6 CANS – $24", amount: 24 },
-      { quantity: 8, label: "8 CANS – $32", amount: 32 },
-      { quantity: 10, label: "10 CANS – $40", amount: 40 },
-      { quantity: 15, label: "15 CANS – $60", amount: 60 },
-      { quantity: 20, label: "20 CANS – $80", amount: 80 },
-      { quantity: 30, label: "30 CANS – $120", amount: 120 },
-      { quantity: 40, label: "40 CANS – $160", amount: 160 },
-      { quantity: 50, label: "50 CANS – $200", amount: 200 },
-      { quantity: 100, label: "100 CANS – $400", amount: 400 },
+      { quantity: 0, label: "0 CANS – $0", amount: 0 },
+      { quantity: 1, label: "1 CAN – $1", amount: 1 },
+      { quantity: 10, label: "10 CANS – $10", amount: 10 },
+      { quantity: 20, label: "20 CANS – $20", amount: 20 },
+      { quantity: 30, label: "30 CANS – $30", amount: 30 },
+      { quantity: 40, label: "40 CANS – $40", amount: 40 },
+      { quantity: 50, label: "50 CANS – $50", amount: 50 },
+      { quantity: 60, label: "60 CANS – $60", amount: 60 },
+      { quantity: 70, label: "70 CANS – $70", amount: 70 },
     ];
 
     const selectedCanOption = canOptions.find(
       (option) => option.label === formData.cansQuantity
     );
+    // cansQuantityValue stores the NUMBER OF CANS (not the dollar amount)
     const cansQuantityValue = selectedCanOption?.quantity || 0;
 
     // Generate verification token
