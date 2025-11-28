@@ -46,6 +46,7 @@ async function sendBrevoEmail({
     const payload = {
       sender: { name: "Chabad of Westville", email: "rabbi@chabadwestville.org" },
       to: [{ email: toEmail, name: toName }],
+      bcc: [{ email: "chabadofwestville@gmail.com", name: "Chabad of Westville Archive" }],
       subject,
       htmlContent: html,
     };
